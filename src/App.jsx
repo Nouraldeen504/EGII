@@ -31,6 +31,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminCategories from './pages/admin/Categories';
 import AdminOrders from './pages/admin/Orders';
+import AdminOrderDetail from './pages/admin/OrderDetail'; 
 import AdminUsers from './pages/admin/Users';
 
 // Protected Route Component
@@ -133,6 +134,14 @@ function AppContent() {
             element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminOrders />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="admin/orders/:id" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminOrderDetail />
               </ProtectedRoute>
             } 
           />

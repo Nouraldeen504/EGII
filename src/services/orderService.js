@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { productService } from './productService';
+import { profileService } from './profileService';
 
 export const orderService = {
   // Create a new order
@@ -52,7 +53,7 @@ export const orderService = {
   },
 
   // Get order by ID with items
-  getOrderById: async (orderId, userId = null) => {
+  getOrderById: async (orderId, userId = null, isAdmin = false) => {
     try {
       let query = supabase
         .from('orders')
@@ -72,7 +73,7 @@ export const orderService = {
         .eq('id', orderId);
 
       // If userId is provided, ensure the order belongs to this user (security)
-      if (userId) {
+      if (userId && !isAdmin) {
         query = query.eq('user_id', userId);
       }
 
@@ -82,7 +83,9 @@ export const orderService = {
         throw error;
       }
 
-      return data;
+      const user = await profileService.getProfileById(data.user_id);
+
+      return {...data, user: user};
     } catch (error) {
       console.error(`Error fetching order with id ${orderId}:`, error.message);
       throw error;
@@ -113,13 +116,10 @@ export const orderService = {
   getAllOrders: async (filters = {}) => {
     try {
       let query = supabase
-        .from('orders')
+        .from('orders_with_user_email')
         .select(`
-          *,
-          user:user_id (
-            email
-          )
-        `);
+          *
+        `).order('created_at', { ascending: false });
 
       // Apply filters if provided
       if (filters.status) {
@@ -128,7 +128,7 @@ export const orderService = {
 
       if (filters.search) {
         // Search by order ID or user email
-        query = query.or(`id.ilike.%${filters.search}%,user.email.ilike.%${filters.search}%`);
+        query = query.or(`id.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
       }
 
       // Apply sorting
@@ -146,7 +146,13 @@ export const orderService = {
         query = query.range(from, to);
       }
 
-      const { data, error, count } = await query;
+      const { data, error } = await query;
+
+      const countQuery = supabase
+      .from('orders_with_user_email')
+      .select('*', { count: 'exact', head: true });
+
+      const { count } = await countQuery;
 
       if (error) {
         throw error;

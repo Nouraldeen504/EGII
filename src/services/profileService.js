@@ -49,14 +49,10 @@ export const profileService = {
   getAllProfiles: async (filters = {}) => {
     try {
       let query = supabase
-        .from('profiles')
+        .from('profiles_with_user_data')
         .select(`
-          *,
-          user:id (
-            email,
-            created_at
-          )
-        `);
+          *
+        `).order('created_at', { ascending: false });
 
       // Apply filters if provided
       if (filters.isAdmin !== undefined) {
@@ -66,7 +62,7 @@ export const profileService = {
       if (filters.search) {
         // Search by name, email, or phone
         query = query.or(
-          `full_name.ilike.%${filters.search}%,user.email.ilike.%${filters.search}%,phone_number.ilike.%${filters.search}%`
+          `full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone_number.ilike.%${filters.search}%`
         );
       }
 
@@ -85,7 +81,14 @@ export const profileService = {
         query = query.range(from, to);
       }
 
-      const { data, error, count } = await query;
+      const { data, error } = await query;
+
+      const countQuery = supabase
+      .from('profiles_with_user_data')
+      .select('*', { count: 'exact', head: true });
+
+      const { count } = await countQuery;
+
 
       if (error) {
         throw error;

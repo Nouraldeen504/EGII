@@ -6,6 +6,7 @@ import {
   FaBoxOpen, 
   FaListAlt, 
   FaShoppingCart, 
+  FaUser,
   FaUsers, 
   FaCog, 
   FaSignOutAlt,
@@ -132,6 +133,9 @@ const AdminLayout = ({ children }) => {
             
             <Link to="/" className="btn btn-outline-primary me-2">
               <FaHome /> View Store
+            </Link>
+            <Link to="/profile" className="btn btn-outline-primary me-2">
+              <FaUser /> Profile
             </Link>
 {/*             
             <Button 

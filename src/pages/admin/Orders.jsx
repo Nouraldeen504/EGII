@@ -343,7 +343,7 @@ const AdminOrders = () => {
                             {formatOrderNumber(order.id)}
                           </Link>
                         </td>
-                        <td>{order.user?.email || 'Unknown'}</td>
+                        <td>{order.user?.full_name || 'Unknown'}</td>
                         <td>{formatDate(order.created_at)}</td>
                         <td>{formatCurrency(order.total_amount)}</td>
                         <td>

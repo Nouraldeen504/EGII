@@ -28,7 +28,7 @@ const AdminOrderDetail = () => {
         setLoading(true);
         setError(null);
         
-        const data = await orderService.getOrderById(id);
+        const data = await orderService.getOrderById(id, null, true);
         setOrder(data);
       } catch (err) {
         console.error('Error fetching order:', err);
@@ -50,7 +50,6 @@ const AdminOrderDetail = () => {
     
     try {
       setUpdating(true);
-      
       // Update order status
       const updatedOrder = await orderService.updateOrderStatus(order.id, newStatus);
       
@@ -231,7 +230,7 @@ const AdminOrderDetail = () => {
                   
                   <Col md={6}>
                     <div className="mb-3">
-                      <strong>Customer:</strong> {order.user?.email || 'Unknown'}
+                      <strong>Customer:</strong> {order.user?.full_name || 'Unknown'}
                     </div>
                     <div className="mb-3">
                       <strong>Payment Method:</strong> Credit Card
@@ -358,7 +357,7 @@ const AdminOrderDetail = () => {
                   </div>
                   <div>
                     <div className="fw-bold">Customer</div>
-                    <div>{order.user?.email || 'Unknown'}</div>
+                    <div>{order.user?.full_name || 'Unknown'}</div>
                   </div>
                 </div>
                 
@@ -378,7 +377,7 @@ const AdminOrderDetail = () => {
                   </div>
                   <div>
                     <div className="fw-bold">Contact</div>
-                    <div>Phone number not available</div>
+                    <div>{order.user?.phone_number || 'Phone number not available'}</div>
                   </div>
                 </div>
               </Card.Body>

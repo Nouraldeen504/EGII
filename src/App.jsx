@@ -33,6 +33,7 @@ import AdminCategories from './pages/admin/Categories';
 import AdminOrders from './pages/admin/Orders';
 import AdminOrderDetail from './pages/admin/OrderDetail'; 
 import AdminUsers from './pages/admin/Users';
+import EditProduct from './pages/admin/EditProduct';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
@@ -144,6 +145,14 @@ function AppContent() {
                 <AdminOrderDetail />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/admin/products/edit/:id" 
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <EditProduct />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/admin/users" 

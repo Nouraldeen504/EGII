@@ -310,7 +310,7 @@ const AdminUsers = () => {
                         <td>
                           <div className="fw-bold">{user.full_name || 'Not provided'}</div>
                         </td>
-                        <td>{user.user?.email}</td>
+                        <td>{user.email}</td>
                         <td>{user.phone_number ? formatPhoneNumber(user.phone_number) : 'Not provided'}</td>
                         <td>
                           <Badge bg={user.is_admin ? 'primary' : 'secondary'}>

@@ -21,7 +21,9 @@ const AdminProducts = () => {
   const [filters, setFilters] = useState({
     search: '',
     category: '',
-    sort: 'created_at:desc'
+    sort: 'created_at:desc',
+    minPrice: '',
+    maxPrice: '',
   });
   
   // State for product deletion
@@ -38,10 +40,15 @@ const AdminProducts = () => {
         
         // Prepare filter object for API
         const apiFilters = {
-          ...filters,
+          categoryId: filters.category,
+          search: filters.search,
+          sortBy: filters.sort,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
           page: currentPage,
           limit: productsPerPage
         };
+        console.log('Fetching products with filters:', apiFilters);
         
         // Fetch products with filters
         const { data, count } = await productService.getAllProducts(apiFilters);
@@ -93,7 +100,9 @@ const AdminProducts = () => {
     setFilters({
       search: '',
       category: '',
-      sort: 'created_at:desc'
+      sort: 'created_at:desc',
+      minPrice: '',
+      maxPrice: ''
     });
     setCurrentPage(1);
   };
@@ -285,6 +294,22 @@ const AdminProducts = () => {
                 >
                   <FaSyncAlt />
                 </Button>
+              </Col>
+              <Col lg={3} md={6}>
+                <InputGroup>
+                  <Form.Control
+                    placeholder="Min price"
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                  />
+                  <Form.Control
+                    placeholder="Max price"
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                  />
+                </InputGroup>
               </Col>
             </Row>
           </Card.Body>

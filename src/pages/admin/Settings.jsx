@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, Tabs, Tab } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Tabs, Tab, Badge} from 'react-bootstrap';
 import { FaSave, FaEnvelope, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';

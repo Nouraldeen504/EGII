@@ -96,7 +96,7 @@ export const categoryService = {
 
       // If products exist with this category, don't allow deletion
       if (products && products.length > 0) {
-        throw new Error('Cannot delete category with associated products. Please reassign or delete the products first.');
+        throw new Error(`The selected category has ${products.length} product(s). Please reassign or delete the products first.`);
       }
 
       // If no products are associated, proceed with deletion

@@ -130,7 +130,7 @@ const AdminOrders = () => {
       await notificationService.sendOrderStatusUpdate(
         updatedOrder.id, 
         updatedOrder.status,
-        selectedOrder.user.email
+        // selectedOrder.user.email #To be resolved
       );
       
       toast.success(`Order status updated to ${getOrderStatusLabel(newStatus)}!`);
@@ -343,7 +343,7 @@ const AdminOrders = () => {
                             {formatOrderNumber(order.id)}
                           </Link>
                         </td>
-                        <td>{order.user_email || 'Unknown'}</td>
+                        <td>{order.user_full_name || 'Unknown'}</td>
                         <td>{formatDate(order.created_at)}</td>
                         <td>{formatCurrency(order.total_amount)}</td>
                         <td>

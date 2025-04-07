@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                               #{order.id.substring(0, 8)}
                             </Link>
                           </td>
-                          <td>{order.user?.email || 'Unknown'}</td>
+                          <td>{order.user_full_name || 'Unknown'}</td>
                           <td>{formatDate(order.created_at)}</td>
                           <td>{formatCurrency(order.total_amount)}</td>
                           <td>

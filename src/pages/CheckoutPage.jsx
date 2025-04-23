@@ -19,14 +19,12 @@ const CheckoutSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email address')
     .required('Email is required'),
+  phone: Yup.number()
+    .required('City is required'),
   address: Yup.string()
     .required('Address is required'),
   city: Yup.string()
     .required('City is required'),
-  state: Yup.string()
-    .required('State is required'),
-  postalCode: Yup.string()
-    .required('Postal code is required'),
   country: Yup.string()
     .required('Country is required'),
   paymentMethod: Yup.string()
@@ -96,12 +94,11 @@ const CheckoutPage = () => {
     const initialValues = {
       fullName: userProfile?.full_name || '',
       email: user?.email || '',
+      phone: userProfile?.phone_number || '',
       address: userProfile?.address?.street || '',
       city: userProfile?.address?.city || '',
-      state: userProfile?.address?.state || '',
-      postalCode: userProfile?.address?.postal_code || '',
-      country: userProfile?.address?.country || 'US',
-      paymentMethod: 'credit_card',
+      country: userProfile?.address?.country || 'LY',
+      paymentMethod: 'cod',
       saveInfo: true
     };
     
@@ -130,8 +127,6 @@ const CheckoutPage = () => {
       const shippingAddress = {
         street: values.address,
         city: values.city,
-        state: values.state,
-        postal_code: values.postalCode,
         country: values.country
       };
       
@@ -139,7 +134,7 @@ const CheckoutPage = () => {
         userId: user.id,
         totalAmount: orderTotal,
         shippingAddress,
-        paymentIntentId: 'mock_payment_id_' + Date.now(), // Would come from payment gateway
+        paymentIntentId: 'payment_id_' + Date.now(), // Would come from payment gateway
         paymentStatus: 'paid' // In a real app, this would depend on the payment gateway response
       };
       
@@ -230,6 +225,7 @@ const CheckoutPage = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             isInvalid={touched.fullName && !!errors.fullName}
+                            disabled={!!values.fullName}
                           />
                           <Form.Control.Feedback type="invalid">
                             {errors.fullName}
@@ -247,6 +243,7 @@ const CheckoutPage = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             isInvalid={touched.email && !!errors.email}
+                            disabled={!!values.email}
                           />
                           <Form.Control.Feedback type="invalid">
                             {errors.email}
@@ -254,9 +251,25 @@ const CheckoutPage = () => {
                         </Form.Group>
                       </Col>
                     </Row>
+
+                    <Form.Group className="mb-3" controlId="phone">
+                      <Form.Label>Phone number</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="phone"
+                        value={values.phone}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        isInvalid={touched.phone && !!errors.phone}
+                        disabled={!!values.phone}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.address}
+                      </Form.Control.Feedback>
+                    </Form.Group>
                     
                     <Form.Group className="mb-3" controlId="address">
-                      <Form.Label>Address</Form.Label>
+                      <Form.Label>Street Address</Form.Label>
                       <Form.Control
                         type="text"
                         name="address"
@@ -288,7 +301,7 @@ const CheckoutPage = () => {
                         </Form.Group>
                       </Col>
                       
-                      <Col md={3}>
+                      {/* <Col md={3}>
                         <Form.Group className="mb-3" controlId="state">
                           <Form.Label>State</Form.Label>
                           <Form.Control
@@ -320,7 +333,7 @@ const CheckoutPage = () => {
                             {errors.postalCode}
                           </Form.Control.Feedback>
                         </Form.Group>
-                      </Col>
+                      </Col> */}
                     </Row>
                     
                     <Form.Group className="mb-4" controlId="country">
@@ -333,12 +346,12 @@ const CheckoutPage = () => {
                         isInvalid={touched.country && !!errors.country}
                       >
                         <option value="">Select Country</option>
-                        <option value="US">United States</option>
-                        <option value="CA">Canada</option>
-                        <option value="UK">United Kingdom</option>
-                        <option value="AU">Australia</option>
-                        <option value="DE">Germany</option>
-                        <option value="FR">France</option>
+                        <option value="LY">Libya</option>
+                        <option value="CY">Cyprus</option>
+                        <option value="TN">Tunisia</option>
+                        <option value="EG">Egypt</option>
+                        <option value="DZ">Algeria</option>
+                        <option value="MA">Morocco</option>
                       </Form.Select>
                       <Form.Control.Feedback type="invalid">
                         {errors.country}
@@ -350,6 +363,18 @@ const CheckoutPage = () => {
                     <h4 className="mb-3">Payment Method</h4>
                     
                     <div className="mb-3">
+                      <Form.Check
+                        type="radio"
+                        id="cod"
+                        name="paymentMethod"
+                        value="cod"
+                        label="Cash on Delivery"
+                        checked={values.paymentMethod === 'cod'}
+                        onChange={handleChange}
+                        isInvalid={touched.paymentMethod && !!errors.paymentMethod}
+                        className="mb-2"
+                      />
+
                       <Form.Check
                         type="radio"
                         id="credit_card"
@@ -398,6 +423,16 @@ const CheckoutPage = () => {
                         <p className="mb-0">
                           <small>
                             <em>In a real application, PayPal integration would be here.</em>
+                          </small>
+                        </p>
+                      </div>
+                    )}
+
+                    {values.paymentMethod === 'cod' && (
+                      <div className="mb-3 p-3 bg-light rounded">
+                        <p className="mb-0">
+                          <small>
+                            <em>Payment will be collected upon delivery</em>
                           </small>
                         </p>
                       </div>

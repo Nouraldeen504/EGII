@@ -144,7 +144,7 @@ const AdminOrderDetail = () => {
   
   // Format address
   const formatAddress = (address) => {
-    return `${address.street}, ${address.city}, ${address.state} ${address.postal_code}, ${address.country}`;
+    return `${address.street}, ${address.city}, ${address.country}`;
   };
   
   // Get appropriate icon for status

@@ -4,7 +4,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaTruck, FaCheck, FaBan, FaEnvelope, FaPrint, FaUser, FaMapMarkerAlt, FaPhone, FaExclamationTriangle } from 'react-icons/fa';
 import { orderService } from '../../services/orderService';
 import { notificationService } from '../../services/notificationService';
-import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../../utils/helpers';
+import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass, getPaymentMethodLabel  } from '../../utils/helpers';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { toast } from 'react-toastify';
 
@@ -233,7 +233,7 @@ const AdminOrderDetail = () => {
                       <strong>Customer:</strong> {order.user?.full_name || 'Unknown'}
                     </div>
                     <div className="mb-3">
-                      <strong>Payment Method:</strong> Credit Card
+                      <strong>Payment Method:</strong> {getPaymentMethodLabel(order.payment_method)}
                     </div>
                     <div>
                       <strong>Payment ID:</strong> {order.payment_intent_id || 'N/A'}

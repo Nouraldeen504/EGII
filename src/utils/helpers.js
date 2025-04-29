@@ -148,3 +148,16 @@ export const formatCurrency = (amount) => {
     const queryString = searchParams.toString();
     return queryString ? `?${queryString}` : '';
   };
+
+  export const PAYMENT_METHODS = {
+    credit_card: 'Credit Card',
+    paypal: 'PayPal',
+    stripe: 'Stripe',
+    cod: 'Cash on Delivery',
+    crypto: 'Cryptocurrency',
+    bank_transfer: 'Bank Transfer'
+  };
+  
+  export const getPaymentMethodLabel = (method) => {
+    return PAYMENT_METHODS[method] || method;
+  };

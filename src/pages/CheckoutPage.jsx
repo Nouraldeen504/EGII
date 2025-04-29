@@ -134,8 +134,9 @@ const CheckoutPage = () => {
         userId: user.id,
         totalAmount: orderTotal,
         shippingAddress,
-        paymentIntentId: 'payment_id_' + Date.now(), // Would come from payment gateway
-        paymentStatus: 'paid' // In a real app, this would depend on the payment gateway response
+        paymentIntentId: 'PI_' + Date.now(), // Would come from payment gateway
+        paymentStatus: values.paymentMethod === 'cod' ? 'pending' : 'paid', // In a real app, this would depend on the payment gateway response
+        paymentMethod: values.paymentMethod
       };
       
       // Create order

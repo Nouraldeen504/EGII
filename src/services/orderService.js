@@ -16,7 +16,8 @@ export const orderService = {
             shipping_address: orderData.shippingAddress,
             payment_intent_id: orderData.paymentIntentId,
             payment_status: orderData.paymentStatus || 'pending',
-            status: 'pending'
+            status: 'pending',
+            payment_method: orderData.paymentMethod || 'credit_card'
           }
         ])
         .select()

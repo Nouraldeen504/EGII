@@ -285,7 +285,7 @@ const CheckoutPage = () => {
                     </Form.Group>
                     
                     <Row>
-                      <Col md={5}>
+                      <Col md={6}>
                         <Form.Group className="mb-3" controlId="city">
                           <Form.Label>City</Form.Label>
                           <Form.Control
@@ -301,63 +301,30 @@ const CheckoutPage = () => {
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-                      
-                      {/* <Col md={3}>
-                        <Form.Group className="mb-3" controlId="state">
-                          <Form.Label>State</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="state"
-                            value={values.state}
+                      <Col md={6}>
+                        <Form.Group className="mb-4" controlId="country">
+                          <Form.Label>Country</Form.Label>
+                          <Form.Select
+                            name="country"
+                            value={values.country}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            isInvalid={touched.state && !!errors.state}
-                          />
+                            isInvalid={touched.country && !!errors.country}
+                          >
+                            <option value="">Select Country</option>
+                            <option value="LY">Libya</option>
+                            <option value="CY">Cyprus</option>
+                            <option value="TN">Tunisia</option>
+                            <option value="EG">Egypt</option>
+                            <option value="DZ">Algeria</option>
+                            <option value="MA">Morocco</option>
+                          </Form.Select>
                           <Form.Control.Feedback type="invalid">
-                            {errors.state}
+                            {errors.country}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
-                      
-                      <Col md={4}>
-                        <Form.Group className="mb-3" controlId="postalCode">
-                          <Form.Label>Postal Code</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="postalCode"
-                            value={values.postalCode}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            isInvalid={touched.postalCode && !!errors.postalCode}
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.postalCode}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col> */}
                     </Row>
-                    
-                    <Form.Group className="mb-4" controlId="country">
-                      <Form.Label>Country</Form.Label>
-                      <Form.Select
-                        name="country"
-                        value={values.country}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={touched.country && !!errors.country}
-                      >
-                        <option value="">Select Country</option>
-                        <option value="LY">Libya</option>
-                        <option value="CY">Cyprus</option>
-                        <option value="TN">Tunisia</option>
-                        <option value="EG">Egypt</option>
-                        <option value="DZ">Algeria</option>
-                        <option value="MA">Morocco</option>
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
-                        {errors.country}
-                      </Form.Control.Feedback>
-                    </Form.Group>
                     
                     <hr className="my-4" />
                     

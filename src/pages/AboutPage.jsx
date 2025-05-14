@@ -1,14 +1,17 @@
 import { Container, Row, Col, Card, Image } from 'react-bootstrap';
 import { FaUsers, FaHandshake, FaClipboardCheck, FaStar } from 'react-icons/fa';
+import { useSettings } from '../contexts/SettingsContext';
 
 const AboutPage = () => {
+  const { settings } = useSettings()
+
   return (
     <Container className="py-5">
       <Row className="mb-5">
         <Col>
-          <h1 className="mb-4">About ShopEase</h1>
+          <h1 className="mb-4">About {settings?.store_name || 'Our Shop'}</h1>
           <p className="lead">
-            ShopEase is your trusted online marketplace, offering a wide range of quality products at competitive prices.
+            {settings?.store_name || 'Our Shop'} is your trusted online marketplace, offering a wide range of quality products at competitive prices.
           </p>
           <p>
             Founded in 2023, we've quickly grown to become one of the leading e-commerce platforms, focusing on customer satisfaction, quality products, and an enjoyable shopping experience.
@@ -29,7 +32,7 @@ const AboutPage = () => {
         <Col md={6}>
           <h2 className="mb-3">Our Story</h2>
           <p>
-            ShopEase was born from a simple idea: make online shopping easy, enjoyable, and accessible to everyone. Our founders, experienced in e-commerce and customer service, identified common pain points in online shopping and set out to create a better experience.
+            {settings?.store_name || 'Our Shop'} was born from a simple idea: make online shopping easy, enjoyable, and accessible to everyone. Our founders, experienced in e-commerce and customer service, identified common pain points in online shopping and set out to create a better experience.
           </p>
           <p>
             What started as a small online store has grown into a comprehensive marketplace, but our core values remain the same. We believe in quality, transparency, and putting our customers first in everything we do.
@@ -108,7 +111,7 @@ const AboutPage = () => {
         <Col>
           <h2 className="mb-4">Our Team</h2>
           <p>
-            Behind ShopEase is a diverse and dedicated team of professionals passionate about e-commerce and customer experience. From our product curators and tech experts to our customer service representatives and logistics specialists, each member plays a vital role in making ShopEase what it is today.
+            Behind {settings?.store_name || 'Our Shop'} is a diverse and dedicated team of professionals passionate about e-commerce and customer experience. From our product curators and tech experts to our customer service representatives and logistics specialists, each member plays a vital role in making {settings?.store_name || 'Our Shop'} what it is today.
           </p>
           <p>
             We're united by our commitment to excellence and our belief that online shopping should be easy, secure, and enjoyable for everyone.

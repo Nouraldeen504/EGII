@@ -69,7 +69,7 @@ const Footer = () => {
         <Row>
           <Col className="text-center">
             <p className="mb-0">
-              &copy; {currentYear} Optech. All rights reserved.
+              &copy; {currentYear} {settings?.store_name || 'Our Shop'}. All rights reserved.
             </p>
           </Col>
         </Row>

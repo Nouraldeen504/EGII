@@ -21,10 +21,6 @@ const ProfileSchema = Yup.object().shape({
     .required('Address is required'),
   city: Yup.string()
     .required('City is required'),
-  state: Yup.string()
-    .required('State is required'),
-  postalCode: Yup.string()
-    .required('Postal code is required'),
   country: Yup.string()
     .required('Country is required')
 });
@@ -76,9 +72,7 @@ const ProfilePage = () => {
       phone: userProfile.phone_number || '',
       address: userProfile.address?.street || '',
       city: userProfile.address?.city || '',
-      state: userProfile.address?.state || '',
-      postalCode: userProfile.address?.postal_code || '',
-      country: userProfile.address?.country || 'US'
+      country: userProfile.address?.country || 'LY'
     };
   };
   
@@ -93,8 +87,6 @@ const ProfilePage = () => {
         address: {
           street: values.address,
           city: values.city,
-          state: values.state,
-          postal_code: values.postalCode,
           country: values.country
         },
         updated_at: new Date()
@@ -305,7 +297,7 @@ const ProfilePage = () => {
                         </Form.Group>
                         
                         <Row>
-                          <Col md={5}>
+                          <Col md={6}>
                             <Form.Group className="mb-3" controlId="city">
                               <Form.Label>City</Form.Label>
                               <Form.Control
@@ -321,63 +313,30 @@ const ProfilePage = () => {
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
-                          
-                          <Col md={3}>
-                            <Form.Group className="mb-3" controlId="state">
-                              <Form.Label>State</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="state"
-                                value={values.state}
+                          <Col md={6}>
+                            <Form.Group className="mb-4" controlId="country">
+                              <Form.Label>Country</Form.Label>
+                              <Form.Select
+                                name="country"
+                                value={values.country}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                isInvalid={touched.state && !!errors.state}
-                              />
+                                isInvalid={touched.country && !!errors.country}
+                              >
+                                <option value="">Select Country</option>
+                                <option value="LY">Libya</option>
+                                <option value="CY">Cyprus</option>
+                                <option value="TN">Tunisia</option>
+                                <option value="EG">Egypt</option>
+                                <option value="DZ">Algeria</option>
+                                <option value="MA">Morocco</option>
+                              </Form.Select>
                               <Form.Control.Feedback type="invalid">
-                                {errors.state}
+                                {errors.country}
                               </Form.Control.Feedback>
                             </Form.Group>
                           </Col>
-                          
-                          <Col md={4}>
-                            <Form.Group className="mb-3" controlId="postalCode">
-                              <Form.Label>Postal Code</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="postalCode"
-                                value={values.postalCode}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                isInvalid={touched.postalCode && !!errors.postalCode}
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.postalCode}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                        
-                        <Form.Group className="mb-4" controlId="country">
-                          <Form.Label>Country</Form.Label>
-                          <Form.Select
-                            name="country"
-                            value={values.country}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            isInvalid={touched.country && !!errors.country}
-                          >
-                            <option value="">Select Country</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="UK">United Kingdom</option>
-                            <option value="AU">Australia</option>
-                            <option value="DE">Germany</option>
-                            <option value="FR">France</option>
-                          </Form.Select>
-                          <Form.Control.Feedback type="invalid">
-                            {errors.country}
-                          </Form.Control.Feedback>
-                        </Form.Group>
+                        </Row> 
                         
                         <div className="d-grid">
                           <Button 

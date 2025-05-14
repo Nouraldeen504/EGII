@@ -4,7 +4,6 @@ import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaDownload, FaShoppingBag } from 'react-icons/fa';
 import { orderService } from '../services/orderService';
 import { useAuth } from '../contexts/AuthContext';
-import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../utils/helpers';
 
 const OrderDetailPage = () => {
@@ -122,6 +121,7 @@ const OrderDetailPage = () => {
                 <Col md={6}>
                   <h5>Order Information</h5>
                   <p className="mb-1"><strong>Date:</strong> {formatDate(order.created_at)}</p>
+                  <p className="mb-1"><strong>Payment Method:</strong> {getPaymentMethodLabel(order.payment_method)}</p>
                   <p className="mb-1"><strong>Payment Status:</strong> {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}</p>
                   <p className="mb-0"><strong>Order Status:</strong> {getOrderStatusLabel(order.status)}</p>
                 </Col>
@@ -130,9 +130,8 @@ const OrderDetailPage = () => {
                   <h5>Shipping Address</h5>
                   <p className="mb-1">{order.shipping_address.street}</p>
                   <p className="mb-1">
-                    {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.postal_code}
+                    {order.shipping_address.city}, {order.shipping_address.country}
                   </p>
-                  <p className="mb-0">{order.shipping_address.country}</p>
                 </Col>
               </Row>
               

@@ -7,6 +7,7 @@ import './App.css';
 // Context Providers
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 // Layout Components
 import Navbar from './components/layout/Navbar';
@@ -195,9 +196,11 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <AppContent />
-      </CartProvider>
+      <SettingsProvider>
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

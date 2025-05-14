@@ -4,6 +4,7 @@ import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaDownload, FaShoppingBag } from 'react-icons/fa';
 import { orderService } from '../services/orderService';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../utils/helpers';
 
 const OrderDetailPage = () => {
@@ -11,6 +12,7 @@ const OrderDetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings } = useSettings();
   
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -159,9 +161,9 @@ const OrderDetailPage = () => {
                           <span>{item.product.name}</span>
                         </div>
                       </td>
-                      <td className="text-center">{formatCurrency(item.price_at_purchase)}</td>
+                      <td className="text-center">{formatCurrency(item.price_at_purchase, settings?.currency)}</td>
                       <td className="text-center">{item.quantity}</td>
-                      <td className="text-end">{formatCurrency(item.price_at_purchase * item.quantity)}</td>
+                      <td className="text-end">{formatCurrency(item.price_at_purchase * item.quantity, settings?.currency)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -177,24 +179,24 @@ const OrderDetailPage = () => {
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Subtotal:</span>
-                <span>{formatCurrency(subtotal)}</span>
+                <span>{formatCurrency(subtotal, settings?.currency)}</span>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Shipping:</span>
-                <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost)}</span>
+                <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost, settings?.currency)}</span>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Tax (7%):</span>
-                <span>{formatCurrency(taxAmount)}</span>
+                <span>{formatCurrency(taxAmount, settings?.currency)}</span>
               </div>
               
               <hr />
               
               <div className="d-flex justify-content-between mb-0">
                 <span className="h5">Total:</span>
-                <span className="h5 text-primary">{formatCurrency(order.total_amount)}</span>
+                <span className="h5 text-primary">{formatCurrency(order.total_amount, settings?.currency)}</span>
               </div>
             </Card.Body>
           </Card>

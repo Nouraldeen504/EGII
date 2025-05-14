@@ -7,6 +7,7 @@ import { productService } from '../../services/productService';
 import { profileService } from '../../services/profileService';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,7 @@ const AdminDashboard = () => {
   });
   const [recentOrders, setRecentOrders] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const { settings } = useSettings();
   
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -126,7 +128,7 @@ const AdminDashboard = () => {
                 <Row>
                   <Col>
                     <div className="stat-label">Total Revenue</div>
-                    <div className="stat-value">{formatCurrency(statistics.revenue.total)}</div>
+                    <div className="stat-value">{formatCurrency(statistics.revenue.total, settings?.currency)}</div>
                     <div className="d-flex align-items-center mt-2">
                       <div className={revenueChange >= 0 ? 'text-success' : 'text-danger'}>
                         {revenueChange >= 0 ? <FaArrowUp className="me-1" /> : <FaArrowDown className="me-1" />}
@@ -245,7 +247,7 @@ const AdminDashboard = () => {
                           </td>
                           <td>{order.user_full_name || 'Unknown'}</td>
                           <td>{formatDate(order.created_at)}</td>
-                          <td>{formatCurrency(order.total_amount)}</td>
+                          <td>{formatCurrency(order.total_amount, settings?.currency)}</td>
                           <td>
                             <span className={`badge status-${order.status}`}>
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

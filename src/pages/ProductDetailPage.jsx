@@ -4,6 +4,7 @@ import { Container, Row, Col, Image, Badge, Button, Spinner, Alert, Form } from 
 import { FaShoppingCart, FaArrowLeft, FaMinusCircle, FaPlusCircle } from 'react-icons/fa';
 import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency } from '../utils/helpers';
 import { toast } from 'react-toastify';
 
@@ -11,6 +12,7 @@ const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { settings } = useSettings();
   
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -150,7 +152,7 @@ const ProductDetailPage = () => {
           </div>
           
           <h3 className="text-primary mb-4">
-            {formatCurrency(product.price)}
+            {formatCurrency(product.price, settings?.currency)}
           </h3>
           
           <div className="mb-4">

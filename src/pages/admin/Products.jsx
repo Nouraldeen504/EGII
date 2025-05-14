@@ -7,6 +7,7 @@ import { categoryService } from '../../services/categoryService';
 import { formatCurrency, formatDate, truncateText } from '../../utils/helpers';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { toast } from 'react-toastify';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -15,6 +16,7 @@ const AdminProducts = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+  const { settings } = useSettings();
   const productsPerPage = 10;
   
   // State for filters
@@ -368,7 +370,7 @@ const AdminProducts = () => {
                             <span className="text-muted">Uncategorized</span>
                           )}
                         </td>
-                        <td>{formatCurrency(product.price)}</td>
+                        <td>{formatCurrency(product.price, settings?.currency)}</td>
                         <td>
                           {product.stock_quantity <= 0 ? (
                             <Badge bg="danger">Out of Stock</Badge>

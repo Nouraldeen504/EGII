@@ -4,12 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaTrash, FaShoppingCart, FaCreditCard, FaArrowLeft, FaStore } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency } from '../utils/helpers';
 import { toast } from 'react-toastify';
 
 const CartPage = () => {
   const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [isUpdating, setIsUpdating] = useState(false);
   
@@ -112,7 +114,7 @@ const CartPage = () => {
                           </Link>
                         </div>
                       </td>
-                      <td>{formatCurrency(item.price)}</td>
+                      <td>{formatCurrency(item.price, settings?.currency)}</td>
                       <td>
                         <Form.Control
                           type="number"
@@ -122,7 +124,7 @@ const CartPage = () => {
                           style={{ maxWidth: '80px' }}
                         />
                       </td>
-                      <td>{formatCurrency(item.price * item.quantity)}</td>
+                      <td>{formatCurrency(item.price * item.quantity, settings?.currency)}</td>
                       <td className="text-end">
                         <Button 
                           variant="outline-danger" 
@@ -170,7 +172,7 @@ const CartPage = () => {
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Subtotal:</span>
-                <span className="fw-bold">{formatCurrency(cartTotal)}</span>
+                <span className="fw-bold">{formatCurrency(cartTotal, settings?.currency)}</span>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
@@ -182,7 +184,7 @@ const CartPage = () => {
               
               <div className="d-flex justify-content-between mb-4">
                 <span className="h5">Total:</span>
-                <span className="h5 text-primary">{formatCurrency(cartTotal)}</span>
+                <span className="h5 text-primary">{formatCurrency(cartTotal, settings?.currency)}</span>
               </div>
               
               <Button 

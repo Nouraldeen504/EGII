@@ -4,11 +4,15 @@ import { Link } from 'react-router-dom';
 import { FaArrowRight, FaShippingFast, FaCreditCard, FaHeadset, FaUndo } from 'react-icons/fa';
 import ProductCard from '../components/products/ProductCard';
 import { productService } from '../services/productService';
+import { useSettings } from '../contexts/SettingsContext';
+import { formatCurrency } from '../utils/helpers';
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { settings, isloading } = useSettings();
+  
   
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -29,6 +33,8 @@ const HomePage = () => {
     fetchFeaturedProducts();
   }, []);
   
+  if (isloading) return <div>Loading store information...</div>;
+
   return (
     <div>
       {/* Hero Carousel */}
@@ -40,7 +46,7 @@ const HomePage = () => {
           >
             <Container className="h-100 d-flex align-items-center">
               <div className="text-white">
-                <h1 className="display-4 fw-bold">Welcome to ShopEase</h1>
+                <h1 className="display-4 fw-bold">Welcome to {settings?.store_name || 'Our Shop'}</h1>
                 <p className="lead">Your one-stop shop for all your needs. Quality products at affordable prices.</p>
                 <Button 
                   as={Link} 
@@ -115,7 +121,7 @@ const HomePage = () => {
                   </div>
                   <Card.Title>Free Shipping</Card.Title>
                   <Card.Text>
-                    On orders above $100
+                    On orders above {formatCurrency(settings?.free_shipping_threshold, settings?.currency)}
                   </Card.Text>
                 </Card.Body>
               </Card>

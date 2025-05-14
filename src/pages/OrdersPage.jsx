@@ -4,10 +4,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaShoppingBag } from 'react-icons/fa';
 import { orderService } from '../services/orderService';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../utils/helpers';
 
 const OrdersPage = () => {
   const { user } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   
   const [orders, setOrders] = useState([]);
@@ -114,7 +116,7 @@ const OrdersPage = () => {
                     </Link>
                   </td>
                   <td>{formatDate(order.created_at)}</td>
-                  <td>{formatCurrency(order.total_amount)}</td>
+                  <td>{formatCurrency(order.total_amount, settings?.currency)}</td>
                   <td>
                     <Badge className={getOrderStatusColorClass(order.status)}>
                       {getOrderStatusLabel(order.status)}

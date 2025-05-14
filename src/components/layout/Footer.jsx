@@ -1,16 +1,18 @@
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { settings } = useSettings();
 
   return (
     <footer className="footer">
       <Container>
         <Row>
           <Col lg={3} md={6} sm={12} className="mb-4">
-            <h5>Optech</h5>
+            <h5>{settings?.store_name || 'Our Shop'}</h5>
             <p>Your one-stop shop for all your needs. Quality products at affordable prices.</p>
             <div className="d-flex mt-3">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="me-3">
@@ -50,15 +52,15 @@ const Footer = () => {
             <ul>
               <li>
                 <FaMapMarkerAlt className="me-2" /> 
-                123 Commerce St, City, Country
+                {settings?.store_adderss || 'Tripoli, Libya'}
               </li>
               <li>
                 <FaPhone className="me-2" /> 
-                +1 (123) 456-7890
+                {settings?.store_phone || ''}
               </li>
               <li>
                 <FaEnvelope className="me-2" /> 
-                info@shopease.com
+                {settings?.store_email || ''}
               </li>
             </ul>
           </Col>

@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock } from 'react-icons/fa';
 import { notificationService } from '../services/notificationService';
 import { toast } from 'react-toastify';
+import { useSettings } from '../contexts/SettingsContext';
 
 // Schema for contact form validation
 const ContactSchema = Yup.object().shape({
@@ -24,6 +25,7 @@ const ContactSchema = Yup.object().shape({
 
 const ContactPage = () => {
   const [formSuccess, setFormSuccess] = useState(false);
+  const { settings, isloading } = useSettings();
   
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
@@ -47,6 +49,8 @@ const ContactPage = () => {
       setSubmitting(false);
     }
   };
+
+  if (isloading) return <div>Loading contact information...</div>;
   
   return (
     <Container className="py-5">
@@ -179,10 +183,7 @@ const ContactPage = () => {
                 <div>
                   <h5 className="mb-1">Address</h5>
                   <p className="mb-0">
-                    123 Commerce Street<br />
-                    Suite 100<br />
-                    New York, NY 10001<br />
-                    United States
+                    {settings?.store_address || "Tripoli, Libya"}
                   </p>
                 </div>
               </div>
@@ -194,8 +195,8 @@ const ContactPage = () => {
                 <div>
                   <h5 className="mb-1">Phone</h5>
                   <p className="mb-0">
-                    <a href="tel:+11234567890" className="text-decoration-none">
-                      +1 (123) 456-7890
+                    <a href={`tel:${settings?.store_phone}`} className="text-decoration-none">
+                      {settings?.store_phone || "+218912158664"}
                     </a>
                   </p>
                 </div>
@@ -208,8 +209,8 @@ const ContactPage = () => {
                 <div>
                   <h5 className="mb-1">Email</h5>
                   <p className="mb-0">
-                    <a href="mailto:info@shopease.com" className="text-decoration-none">
-                      info@shopease.com
+                    <a href={`mailto:${settings?.store_email}`} className="text-decoration-none">
+                      {settings?.store_email || "info@optech.ly"}
                     </a>
                   </p>
                 </div>

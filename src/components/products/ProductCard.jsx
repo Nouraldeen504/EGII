@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../../contexts/CartContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import { formatCurrency, truncateText } from '../../utils/helpers';
 import { toast } from 'react-toastify';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { settings } = useSettings();
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -69,7 +71,7 @@ const ProductCard = ({ product }) => {
         
         <div className="mt-auto">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <span className="price">{formatCurrency(product.price)}</span>
+            <span className="price">{formatCurrency(product.price, settings?.currency)}</span>
             {getStockBadge()}
           </div>
           

@@ -6,6 +6,7 @@ import * as Yup from 'yup';
 import { FaCreditCard, FaShoppingBag, FaArrowLeft } from 'react-icons/fa';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatCurrency } from '../utils/helpers';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
@@ -34,6 +35,7 @@ const CheckoutSchema = Yup.object().shape({
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user, userProfile } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
@@ -478,7 +480,7 @@ const CheckoutPage = () => {
                         ) : (
                           <>
                             <FaCreditCard className="me-2" /> 
-                            Place Order - {formatCurrency(orderTotal)}
+                            Place Order - {formatCurrency(orderTotal, settings?.currency)}
                           </>
                         )}
                       </Button>
@@ -517,7 +519,7 @@ const CheckoutPage = () => {
                     <div>
                       <span className="fw-bold">{item.quantity}x</span> {item.name}
                     </div>
-                    <span>{formatCurrency(item.price * item.quantity)}</span>
+                    <span>{formatCurrency(item.price * item.quantity, settings?.currency)}</span>
                   </div>
                 ))}
               </div>
@@ -526,24 +528,24 @@ const CheckoutPage = () => {
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Subtotal:</span>
-                <span>{formatCurrency(cartTotal)}</span>
+                <span>{formatCurrency(cartTotal, settings?.currency)}</span>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Shipping:</span>
-                <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost)}</span>
+                <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost, settings?.currency)}</span>
               </div>
               
               <div className="d-flex justify-content-between mb-2">
                 <span>Tax (7%):</span>
-                <span>{formatCurrency(taxAmount)}</span>
+                <span>{formatCurrency(taxAmount, settings?.currency)}</span>
               </div>
               
               <hr />
               
               <div className="d-flex justify-content-between mb-0">
                 <span className="h5">Total:</span>
-                <span className="h5 text-primary">{formatCurrency(orderTotal)}</span>
+                <span className="h5 text-primary">{formatCurrency(orderTotal, settings?.currency)}</span>
               </div>
             </Card.Body>
           </Card>

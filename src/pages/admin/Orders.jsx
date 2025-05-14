@@ -7,6 +7,7 @@ import { notificationService } from '../../services/notificationService';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../../utils/helpers';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { toast } from 'react-toastify';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -15,6 +16,7 @@ const AdminOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const ordersPerPage = 10;
+  const { settings } = useSettings();
   
   // State for filters
   const [filters, setFilters] = useState({
@@ -345,7 +347,7 @@ const AdminOrders = () => {
                         </td>
                         <td>{order.user_full_name || 'Unknown'}</td>
                         <td>{formatDate(order.created_at)}</td>
-                        <td>{formatCurrency(order.total_amount)}</td>
+                        <td>{formatCurrency(order.total_amount, settings?.currency)}</td>
                         <td>
                           <Badge className={getOrderStatusColorClass(order.status)}>
                             {getStatusIcon(order.status)} {getOrderStatusLabel(order.status)}

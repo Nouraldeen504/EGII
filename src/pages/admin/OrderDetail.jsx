@@ -7,6 +7,7 @@ import { notificationService } from '../../services/notificationService';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../../utils/helpers';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { toast } from 'react-toastify';
+import { useSettings } from '../../contexts/SettingsContext';
 
 const AdminOrderDetail = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const AdminOrderDetail = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { settings } = useSettings();
   
   // Status update modal
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -273,9 +275,9 @@ const AdminOrderDetail = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="text-center">{formatCurrency(item.price_at_purchase)}</td>
+                        <td className="text-center">{formatCurrency(item.price_at_purchase, settings?.currency)}</td>
                         <td className="text-center">{item.quantity}</td>
-                        <td className="text-end">{formatCurrency(item.price_at_purchase * item.quantity)}</td>
+                        <td className="text-end">{formatCurrency(item.price_at_purchase * item.quantity, settings?.currency)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -390,24 +392,24 @@ const AdminOrderDetail = () => {
               <Card.Body>
                 <div className="d-flex justify-content-between mb-2">
                   <span>Subtotal:</span>
-                  <span>{formatCurrency(subtotal)}</span>
+                  <span>{formatCurrency(subtotal, settings?.currency)}</span>
                 </div>
                 
                 <div className="d-flex justify-content-between mb-2">
                   <span>Shipping:</span>
-                  <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost)}</span>
+                  <span>{shippingCost === 0 ? 'Free' : formatCurrency(shippingCost, settings?.currency)}</span>
                 </div>
                 
                 <div className="d-flex justify-content-between mb-2">
                   <span>Tax (7%):</span>
-                  <span>{formatCurrency(taxAmount)}</span>
+                  <span>{formatCurrency(taxAmount, settings?.currency)}</span>
                 </div>
                 
                 <hr />
                 
                 <div className="d-flex justify-content-between mb-0">
                   <span className="h5">Total:</span>
-                  <span className="h5 text-primary">{formatCurrency(order.total_amount)}</span>
+                  <span className="h5 text-primary">{formatCurrency(order.total_amount, settings?.currency)}</span>
                 </div>
               </Card.Body>
             </Card>

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect  } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Tabs, Tab, Badge} from 'react-bootstrap';
 import { FaSave, FaEnvelope, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { toast } from 'react-toastify';
+import { getSettings, updateSettings } from '../../services/settingsService';
 
 // Validation schema for store settings
 const StoreSettingsSchema = Yup.object().shape({
@@ -48,78 +49,133 @@ const PaymentSettingsSchema = Yup.object().shape({
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState('store');
   const [saveSuccess, setSaveSuccess] = useState(false);
-  
-  // Store settings initial values (would come from database in a real app)
-  const storeSettings = {
-    storeName: 'ShopEase',
-    storeEmail: 'info@shopease.com',
-    storePhone: '123-456-7890',
-    storeAddress: '123 Commerce St, New York, NY 10001, USA',
+  const [loading, setLoading] = useState(true);
+  const [initialStoreSettings, setInitialStoreSettings] = useState({
+    storeName: '',
+    storeEmail: '',
+    storePhone: '',
+    storeAddress: '',
     currency: 'USD',
-    enableTaxes: true,
-    taxRate: 7
-  };
+    enableTaxes: false,
+    taxRate: 0,
+    freeShippingThreshold: 0,
+    standardShippingRate: 0,
+    expressShippingRate: 0,
+    enableInternationalShipping: false,
+    internationalShippingRate: 0,
+    enableCreditCard: false,
+    enablePaypal: false,
+    stripePublicKey: '',
+    stripeSecretKey: '',
+    paypalClientId: ''
+  });
   
-  // Shipping settings initial values
-  const shippingSettings = {
-    freeShippingThreshold: 100,
-    standardShippingRate: 10,
-    expressShippingRate: 25,
-    enableInternationalShipping: true,
-    internationalShippingRate: 30
-  };
-  
-  // Payment settings initial values
-  const paymentSettings = {
-    enableCreditCard: true,
-    enablePaypal: true,
-    stripePublicKey: 'pk_test_your_stripe_public_key',
-    stripeSecretKey: 'sk_test_your_stripe_secret_key',
-    paypalClientId: 'your_paypal_client_id'
-  };
-  
+  // Load settings on component mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const settings = await getSettings();
+        setInitialStoreSettings(settings);
+        console.log(settings);
+      } catch (error) {
+        toast.error('Failed to load settings: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadSettings();
+  }, []);
+
   // Handle store settings submission
-  const handleStoreSettingsSubmit = (values, { setSubmitting }) => {
-    // In a real app, this would save to the database
-    setTimeout(() => {
-      console.log('Store settings saved:', values);
+  const handleStoreSettingsSubmit = async (values, { setSubmitting }) => {
+    try {
+      await updateSettings({
+        ...values,
+        // Ensure we don't overwrite other settings when updating a specific tab
+        freeShippingThreshold: initialStoreSettings.freeShippingThreshold,
+        standardShippingRate: initialStoreSettings.standardShippingRate,
+        expressShippingRate: initialStoreSettings.expressShippingRate,
+        enableInternationalShipping: initialStoreSettings.enableInternationalShipping,
+        internationalShippingRate: initialStoreSettings.internationalShippingRate,
+        enableCreditCard: initialStoreSettings.enableCreditCard,
+        enablePaypal: initialStoreSettings.enablePaypal,
+        stripePublicKey: initialStoreSettings.stripePublicKey,
+        stripeSecretKey: initialStoreSettings.stripeSecretKey,
+        paypalClientId: initialStoreSettings.paypalClientId
+      });
+      
+      setInitialStoreSettings(prev => ({ ...prev, ...values }));
       setSaveSuccess(true);
       toast.success('Store settings saved successfully!');
+    } catch (error) {
+      toast.error('Failed to save settings: ' + error.message);
+    } finally {
       setSubmitting(false);
-      
-      // Reset success message after a delay
       setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1000);
+    }
   };
-  
+
   // Handle shipping settings submission
-  const handleShippingSettingsSubmit = (values, { setSubmitting }) => {
-    // In a real app, this would save to the database
-    setTimeout(() => {
-      console.log('Shipping settings saved:', values);
+  const handleShippingSettingsSubmit = async (values, { setSubmitting }) => {
+    try {
+      await updateSettings({
+        ...initialStoreSettings,
+        ...values
+      });
+      
+      setInitialStoreSettings(prev => ({ ...prev, ...values }));
       setSaveSuccess(true);
       toast.success('Shipping settings saved successfully!');
+    } catch (error) {
+      toast.error('Failed to save settings: ' + error.message);
+    } finally {
       setSubmitting(false);
-      
-      // Reset success message after a delay
       setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1000);
+    }
   };
   
   // Handle payment settings submission
-  const handlePaymentSettingsSubmit = (values, { setSubmitting }) => {
-    // In a real app, this would save to the database
-    setTimeout(() => {
-      console.log('Payment settings saved:', values);
+  const handlePaymentSettingsSubmit = async (values, { setSubmitting }) => {
+    try {
+      await updateSettings({
+        ...initialStoreSettings,
+        ...values
+      });
+      
+      setInitialStoreSettings(prev => ({ ...prev, ...values }));
       setSaveSuccess(true);
       toast.success('Payment settings saved successfully!');
+    } catch (error) {
+      toast.error('Failed to save settings: ' + error.message);
+    } finally {
       setSubmitting(false);
-      
-      // Reset success message after a delay
       setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1000);
+    }
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <Container fluid className="py-4">
+          <h1 className="mb-4">Store Settings</h1>
+          <Alert variant="info">Loading settings...</Alert>
+        </Container>
+      </AdminLayout>
+    );
+  }
   
+  if (!initialStoreSettings) {
+    return (
+      <AdminLayout>
+        <Container fluid className="py-4">
+          <h1 className="mb-4">Store Settings</h1>
+          <Alert variant="danger">Failed to load settings</Alert>
+        </Container>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <Container fluid className="py-4">
@@ -140,9 +196,10 @@ const AdminSettings = () => {
             >
               <Tab eventKey="store" title="General Settings">
                 <Formik
-                  initialValues={storeSettings}
+                  initialValues={initialStoreSettings}
                   validationSchema={StoreSettingsSchema}
                   onSubmit={handleStoreSettingsSubmit}
+                  enableReinitialize
                 >
                   {({ handleSubmit, handleChange, handleBlur, values, touched, errors, isSubmitting }) => (
                     <Form noValidate onSubmit={handleSubmit}>
@@ -177,8 +234,7 @@ const AdminSettings = () => {
                               <option value="USD">USD - US Dollar</option>
                               <option value="EUR">EUR - Euro</option>
                               <option value="GBP">GBP - British Pound</option>
-                              <option value="CAD">CAD - Canadian Dollar</option>
-                              <option value="AUD">AUD - Australian Dollar</option>
+                              <option value="LYD">LYD - Libyan Dinar</option>
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
                               {errors.currency}
@@ -277,9 +333,10 @@ const AdminSettings = () => {
               
               <Tab eventKey="shipping" title="Shipping Settings">
                 <Formik
-                  initialValues={shippingSettings}
+                  initialValues={initialStoreSettings}
                   validationSchema={ShippingSettingsSchema}
                   onSubmit={handleShippingSettingsSubmit}
+                  enableReinitialize
                 >
                   {({ handleSubmit, handleChange, handleBlur, values, touched, errors, isSubmitting }) => (
                     <Form noValidate onSubmit={handleSubmit}>
@@ -391,9 +448,10 @@ const AdminSettings = () => {
               
               <Tab eventKey="payment" title="Payment Settings">
                 <Formik
-                  initialValues={paymentSettings}
+                  initialValues={initialStoreSettings}
                   validationSchema={PaymentSettingsSchema}
                   onSubmit={handlePaymentSettingsSubmit}
+                  enableReinitialize
                 >
                   {({ handleSubmit, handleChange, handleBlur, values, touched, errors, isSubmitting }) => (
                     <Form noValidate onSubmit={handleSubmit}>

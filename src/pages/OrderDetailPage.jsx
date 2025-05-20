@@ -5,6 +5,8 @@ import { FaArrowLeft, FaDownload, FaShoppingBag } from 'react-icons/fa';
 import { orderService } from '../services/orderService';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, formatDate, formatOrderNumber, getOrderStatusLabel, getOrderStatusColorClass } from '../utils/helpers';
+import { useSettings } from '../contexts/SettingsContext';
+import { getPaymentMethodLabel } from '../utils/helpers';
 
 const OrderDetailPage = () => {
   const { id } = useParams();

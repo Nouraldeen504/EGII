@@ -180,9 +180,7 @@ export const orderService = {
         throw error;
       }
 
-      console.log(`order status: ${status}`);
       if(status === 'canceled'){
-        console.log("Cancelling order");
         await supabase.rpc('update_stock_after_order_cancellation', { order_id: orderId });
       }
 

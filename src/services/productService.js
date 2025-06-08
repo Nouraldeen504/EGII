@@ -174,9 +174,14 @@ export const productService = {
   // Admin: Create new product
   createProduct: async (productData) => {
     try {
+      // Remove the image_url if it's a local blob URL (from file preview)
+      if (productData.image_url && productData.image_url.startsWith('blob:')) {
+        delete productData.image_url;
+      }
+      const { image_file, ...dataToSend } = productData;
       const { data, error } = await supabase
         .from('products')
-        .insert([productData])
+        .insert([dataToSend])
         .select()
         .single();
 
@@ -194,6 +199,15 @@ export const productService = {
   // Admin: Update existing product
   updateProduct: async (id, productData) => {
     try {
+
+      const { data: currentProduct, error: fetchError } = await supabase
+        .from('products')
+        .select('image_url')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { data, error } = await supabase
         .from('products')
         .update(productData)
@@ -201,8 +215,33 @@ export const productService = {
         .select()
         .single();
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      if (currentProduct.image_url && 
+        productData.image_url && 
+        currentProduct.image_url !== productData.image_url) {
+        try {
+          let oldFilePath = currentProduct.image_url;
+          
+          // Handle both full URLs and storage paths
+          if (oldFilePath.startsWith('http')) {
+            const url = new URL(oldFilePath);
+            oldFilePath = url.pathname.split('/').slice(6).join('/');
+          } else if (oldFilePath.startsWith('public/')) {
+            oldFilePath = oldFilePath.replace(/^public\/product-images\//, '');
+          }
+          console.log(`Old path: ${oldFilePath}`);
+          // Delete the old image
+          const { error: deleteError } = await supabase.storage
+            .from('product-images')
+            .remove([oldFilePath]);
+
+          if (deleteError) {
+            console.warn('Old image deletion failed:', deleteError.message);
+          }
+        } catch (deleteError) {
+          console.warn('Old image deletion failed:', deleteError.message);
+        }
       }
 
       return data;
@@ -215,6 +254,14 @@ export const productService = {
   // Admin: Delete product (soft delete by setting is_active to false)
   deleteProduct: async (id) => {
     try {
+      const { data: productData, error: fetchError } = await supabase
+        .from('products')
+        .select('image_url')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { data, error } = await supabase
         .from('products')
         .update({ is_active: false })
@@ -222,8 +269,30 @@ export const productService = {
         .select()
         .single();
 
-      if (error) {
-        throw error;
+      if (error) throw error;
+
+      
+      if (productData.image_url) {
+        try {
+          let filePath = productData.image_url;
+          console.log(filePath);
+          
+          if (filePath.startsWith('http')) {
+            const url = new URL(filePath);
+            filePath = url.pathname.split('/').slice(6).join('/');
+            console.log(`Here is again: ${filePath}`);
+          }
+          
+          const { error: storageError } = await supabase.storage
+            .from('product-images')
+            .remove([filePath]);
+  
+          if (storageError) {
+            console.error(`Product deleted but image removal failed: ${storageError.message}`);
+          }
+        } catch (storageError) {
+          console.error(`Product deleted but image removal failed: ${storageError.message}`);
+        }
       }
 
       return data;

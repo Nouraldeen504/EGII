@@ -29,9 +29,6 @@ const ContactPage = () => {
   
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      // In a real application, this would send the form data to a server
-      // For demo purposes, we'll just simulate a success response
-      
       await notificationService.sendContactFormNotification(values);
       
       setFormSuccess(true);

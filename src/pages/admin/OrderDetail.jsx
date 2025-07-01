@@ -54,6 +54,7 @@ const AdminOrderDetail = () => {
       setUpdating(true);
       // Update order status
       const updatedOrder = await orderService.updateOrderStatus(order.id, newStatus);
+      const userEmail = await orderService.getUserEmailByOrderId(order.id);
       
       // Update local state
       setOrder({ ...order, status: updatedOrder.status });
@@ -62,7 +63,7 @@ const AdminOrderDetail = () => {
       await notificationService.sendOrderStatusUpdate(
         updatedOrder.id, 
         updatedOrder.status,
-        order.user?.email
+        userEmail
       );
       
       toast.success(`Order status updated to ${getOrderStatusLabel(newStatus)}!`);

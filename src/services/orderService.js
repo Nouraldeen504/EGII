@@ -249,5 +249,24 @@ export const orderService = {
       console.error('Error fetching order statistics:', error.message);
       throw error;
     }
+  },
+
+  getUserEmailByOrderId: async (orderId) => {
+    try {
+      const { data, error } = await supabase
+        .from('orders_with_user_email')
+        .select('user_email')
+        .eq('id', orderId)
+        .single();
+  
+      if (error) {
+        throw error;
+      }
+  
+      return data?.user_email;
+    } catch (error) {
+      console.error(`Error fetching user email for order ${orderId}:`, error.message);
+      throw error;
+    }
   }
 };

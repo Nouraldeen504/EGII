@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Image, Badge, Button, Spinner, Alert, Form } from 'react-bootstrap';
-import { FaShoppingCart, FaArrowLeft, FaMinusCircle, FaPlusCircle } from 'react-icons/fa';
+import { FaShoppingCart, FaFilePdf, FaArrowLeft, FaMinusCircle, FaPlusCircle } from 'react-icons/fa';
 import { productService } from '../services/productService';
 import { useCart } from '../contexts/CartContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -213,6 +213,21 @@ const ProductDetailPage = () => {
               {product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
             </Button>
           </div>
+          {product.datasheet_url && (
+            <div className="mt-4 pt-3 border-top">
+              <h5 className="mb-3">Product Datasheet</h5>
+              <Button 
+                variant="outline-primary" 
+                as="a" 
+                href={product.datasheet_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="d-flex align-items-center gap-2"
+              >
+                <FaFilePdf /> View Datasheet
+              </Button>
+            </div>
+          )}
         </Col>
       </Row>
     </Container>

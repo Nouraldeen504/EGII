@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Card, Alert, Spinner, InputGroup } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { FaSave, FaTimes, FaUpload, FaImage, FaDollarSign, FaBoxOpen } from 'react-icons/fa';
+import { FaSave, FaTimes, FaFilePdf, FaUpload, FaImage, FaDollarSign, FaBoxOpen } from 'react-icons/fa';
 import { supabase } from '../../services/supabase';
 import { categoryService } from '../../services/categoryService';
 import { toast } from 'react-toastify';
@@ -58,7 +58,8 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
     category_id: product?.category_id || '',
     is_featured: product?.is_featured || false,
     is_active: product?.is_active !== undefined ? product.is_active : true,
-    image_url: product?.image_url || ''
+    image_url: product?.image_url || '',
+    datasheet_url: product?.datasheet_url || ''
   };
 
   useEffect(() => {
@@ -118,6 +119,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const handleFormSubmit = async (values, { setSubmitting }) => {
     try {
       let imageUrl = values.image_url;
+      let datasheetUrl = values.datasheet_url;
 
       // If a new file was selected, upload it
       if (selectedFile && values.image_url.startsWith('blob:')) {
@@ -128,9 +130,11 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
       // Prepare data without the file object
       const dataToSubmit = {
         ...values,
-        image_url: imageUrl
+        image_url: imageUrl,
+        datasheet_url: datasheetUrl
       };
       delete dataToSubmit.image_file;
+      delete dataToSubmit.datasheet_file;
 
       await onSubmit(dataToSubmit);
     } catch (error) {
@@ -348,6 +352,92 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                       />
                       <Form.Control.Feedback type="invalid">
                         {errors.image_url}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Card.Body>
+                </Card>
+                <Card className="shadow-sm mb-4">
+                  <Card.Body>
+                    <h5 className="mb-4">Product Datasheet</h5>
+                    
+                    {values.datasheet_url && (
+                      <div className="mb-3">
+                        <a 
+                          href={values.datasheet_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="d-flex align-items-center gap-2 text-primary"
+                        >
+                          <FaFilePdf /> View Current Datasheet
+                        </a>
+                      </div>
+                    )}
+                    
+                    <Form.Group className="mb-3" controlId="datasheet_file">
+                      <Form.Label>Upload New Datasheet</Form.Label>
+                      <Form.Control
+                        type="file"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          
+                          if (file.size > 10 * 1024 * 1024) {
+                            toast.error('File size too large (max 10MB)');
+                            return;
+                          }
+                          
+                          try {
+                            setUploading(true);
+                            
+                            const fileExt = file.name.split('.').pop();
+                            const fileName = `${Math.random()}.${fileExt}`;
+                            const filePath = `product-datasheets/${fileName}`;
+                            
+                            const { error } = await supabase.storage
+                              .from('product-datasheets')
+                              .upload(filePath, file, {
+                                cacheControl: '3600',
+                                upsert: false,
+                                contentType: file.type,
+                              });
+                            
+                            if (error) throw error;
+                            
+                            const { data: { publicUrl } } = supabase.storage
+                              .from('product-datasheets')
+                              .getPublicUrl(filePath);
+                            
+                            setFieldValue('datasheet_url', publicUrl);
+                          } catch (error) {
+                            console.error('Datasheet upload error:', error);
+                            toast.error('Datasheet upload failed');
+                            setFieldValue('datasheet_url', '');
+                          } finally {
+                            setUploading(false);
+                          }
+                        }}
+                        disabled={uploading}
+                      />
+                      <Form.Text className="text-muted">
+                        Upload product datasheet (PDF, DOC, XLS, etc.)
+                      </Form.Text>
+                    </Form.Group>
+                    
+                    <Form.Group className="mb-3" controlId="datasheet_url">
+                      <Form.Label>Or Datasheet URL</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="datasheet_url"
+                        value={values.datasheet_url}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        isInvalid={touched.datasheet_url && !!errors.datasheet_url}
+                        placeholder="Enter datasheet URL"
+                        disabled={uploading}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.datasheet_url}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Card.Body>

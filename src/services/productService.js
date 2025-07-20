@@ -1,5 +1,36 @@
 import { supabase } from './supabase';
 
+function extractStoragePath(url, bucketName) {
+  if (!url) return null;
+  
+  try {
+    // Handle Supabase public URLs
+    if (url.includes('supabase.co/storage/v1/object/public/')) {
+      const parts = url.split('/');
+      const bucketIndex = parts.indexOf('public') + 1;
+      const pathParts = parts.slice(bucketIndex + 1);
+      return pathParts.join('/');
+    }
+    
+    // Handle direct storage paths
+    if (url.startsWith(`${bucketName}/`)) {
+      return url.replace(`${bucketName}/`, '');
+    }
+    
+    // Handle full URLs that don't match Supabase pattern
+    if (url.startsWith('http')) {
+      const urlObj = new URL(url);
+      return urlObj.pathname.slice(1); // Remove leading slash
+    }
+    
+    // Assume it's already just the path
+    return url;
+  } catch (error) {
+    console.error('Error extracting storage path:', error);
+    return null;
+  }
+}
+
 export const productService = {
   // Fetch all products with category information
   getAllProducts: async (filters = {}) => {
@@ -196,18 +227,19 @@ export const productService = {
     }
   },
 
-  // Admin: Update existing product
   updateProduct: async (id, productData) => {
     try {
-
+      // Get current product data including both image and datasheet URLs
       const { data: currentProduct, error: fetchError } = await supabase
         .from('products')
-        .select('image_url')
+        .select('image_url, datasheet_url')
         .eq('id', id)
         .single();
 
+
       if (fetchError) throw fetchError;
 
+      // Update the product
       const { data, error } = await supabase
         .from('products')
         .update(productData)
@@ -217,32 +249,44 @@ export const productService = {
 
       if (error) throw error;
 
+      // Handle old image cleanup if image changed
       if (currentProduct.image_url && 
-        productData.image_url && 
-        currentProduct.image_url !== productData.image_url) {
+          productData.image_url && 
+          currentProduct.image_url !== productData.image_url) {
         try {
-          let oldFilePath = currentProduct.image_url;
-          
-          // Handle both full URLs and storage paths
-          if (oldFilePath.startsWith('http')) {
-            const url = new URL(oldFilePath);
-            oldFilePath = url.pathname.split('/').slice(6).join('/');
-          } else if (oldFilePath.startsWith('public/')) {
-            oldFilePath = oldFilePath.replace(/^public\/product-images\//, '');
-          }
-          console.log(`Old path: ${oldFilePath}`);
-          // Delete the old image
-          const { error: deleteError } = await supabase.storage
-            .from('product-images')
-            .remove([oldFilePath]);
-
-          if (deleteError) {
-            console.warn('Old image deletion failed:', deleteError.message);
+          const oldImagePath = extractStoragePath(currentProduct.image_url, 'product-images');
+          if (oldImagePath) {
+            await supabase.storage
+              .from('product-images')
+              .remove([oldImagePath]);
           }
         } catch (deleteError) {
           console.warn('Old image deletion failed:', deleteError.message);
         }
       }
+
+      // Handle old datasheet cleanup if datasheet changed
+      if (currentProduct.datasheet_url && 
+        productData.datasheet_url && 
+        currentProduct.datasheet_url !== productData.datasheet_url) {
+      try {
+        const oldDatasheetPath = extractStoragePath(currentProduct.datasheet_url, 'product-datasheets');
+        if (oldDatasheetPath) {
+          console.log('Attempting to delete datasheet at path:', oldDatasheetPath);
+          const { error: deleteError } = await supabase.storage
+            .from('product-datasheets')
+            .remove([oldDatasheetPath]);
+          
+          if (deleteError) {
+            console.warn('Datasheet deletion failed:', deleteError);
+          } else {
+            console.log('Successfully deleted old datasheet');
+          }
+        }
+      } catch (deleteError) {
+        console.warn('Datasheet deletion failed:', deleteError);
+      }
+    }
 
       return data;
     } catch (error) {
@@ -251,17 +295,19 @@ export const productService = {
     }
   },
 
-  // Admin: Delete product (soft delete by setting is_active to false)
   deleteProduct: async (id) => {
     try {
+      // Get current product data including both image and datasheet URLs
       const { data: productData, error: fetchError } = await supabase
         .from('products')
-        .select('image_url')
+        .select('image_url, datasheet_url')
         .eq('id', id)
         .single();
 
+        
       if (fetchError) throw fetchError;
 
+      // Soft delete the product
       const { data, error } = await supabase
         .from('products')
         .update({ is_active: false })
@@ -271,27 +317,38 @@ export const productService = {
 
       if (error) throw error;
 
-      
+      // Delete associated image if exists
       if (productData.image_url) {
         try {
-          let filePath = productData.image_url;
-          console.log(filePath);
-          
-          if (filePath.startsWith('http')) {
-            const url = new URL(filePath);
-            filePath = url.pathname.split('/').slice(6).join('/');
-            console.log(`Here is again: ${filePath}`);
-          }
-          
-          const { error: storageError } = await supabase.storage
-            .from('product-images')
-            .remove([filePath]);
-  
-          if (storageError) {
-            console.error(`Product deleted but image removal failed: ${storageError.message}`);
+          const imagePath = extractStoragePath(productData.image_url, 'product-images');
+          if (imagePath) {
+            await supabase.storage
+              .from('product-images')
+              .remove([imagePath]);
           }
         } catch (storageError) {
-          console.error(`Product deleted but image removal failed: ${storageError.message}`);
+          console.error('Image removal failed:', storageError.message);
+        }
+      }
+
+      // Delete associated datasheet if exists
+      if (productData.datasheet_url) {
+        try {
+          const datasheetPath = extractStoragePath(productData.datasheet_url, 'product-datasheets');
+          if (datasheetPath) {
+            console.log('Attempting to delete datasheet at path:', datasheetPath);
+            const { error: deleteError } = await supabase.storage
+              .from('product-datasheets')
+              .remove([datasheetPath]);
+            
+            if (deleteError) {
+              console.error('Datasheet removal failed:', deleteError);
+            } else {
+              console.log('Successfully deleted product datasheet');
+            }
+          }
+        } catch (storageError) {
+          console.error('Datasheet removal failed:', storageError);
         }
       }
 

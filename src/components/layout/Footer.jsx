@@ -14,7 +14,7 @@ const Footer = () => {
           <Col lg={3} md={6} sm={12} className="mb-4">
             <h5>{settings?.store_name || 'Our Shop'}</h5>
             <p>Your one-stop shop for all your needs. Quality products at affordable prices.</p>
-            <div className="d-flex mt-3">
+            {/* <div className="d-flex mt-3">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="me-3">
                 <FaFacebook size={20} />
               </a>
@@ -27,7 +27,7 @@ const Footer = () => {
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
                 <FaLinkedin size={20} />
               </a>
-            </div>
+            </div> */}
           </Col>
           <Col lg={3} md={6} sm={12} className="mb-4">
             <h5>Quick Links</h5>
@@ -41,8 +41,8 @@ const Footer = () => {
           <Col lg={3} md={6} sm={12} className="mb-4">
             <h5>Customer Service</h5>
             <ul>
-              <li><Link to="/faq">FAQs</Link></li>
-              <li><Link to="/shipping">Shipping & Returns</Link></li>
+              {/* <li><Link to="/faq">FAQs</Link></li>
+              <li><Link to="/shipping">Shipping & Returns</Link></li> */}
               <li><Link to="/privacy">Privacy Policy</Link></li>
               <li><Link to="/terms">Terms & Conditions</Link></li>
             </ul>

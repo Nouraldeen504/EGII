@@ -220,9 +220,9 @@ const ContactPage = () => {
                 <div>
                   <h5 className="mb-1">Business Hours</h5>
                   <p className="mb-0">
-                    Monday - Friday: 9:00 AM - 6:00 PM<br />
-                    Saturday: 10:00 AM - 4:00 PM<br />
-                    Sunday: Closed
+                    Sunday - Thrusday: 8:30 - 17:30<br />
+                    Saturday: 10:00 - 14:00<br />
+                    Friday: Closed
                   </p>
                 </div>
               </div>
@@ -233,7 +233,7 @@ const ContactPage = () => {
             <Card.Body className="p-4">
               <h3 className="mb-3">Customer Support</h3>
               <p className="mb-0">
-                Our customer support team is available Monday through Friday from 9:00 AM to 6:00 PM Eastern Time to assist you with any questions or concerns.
+                Our customer support team is available Sunday through Thursday from 8:30 AM to 5:30 PM Libya Time to assist you with any questions or concerns.
               </p>
             </Card.Body>
           </Card>

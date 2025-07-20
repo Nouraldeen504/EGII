@@ -210,29 +210,6 @@ const HomePage = () => {
           )}
         </Container>
       </section>
-      
-      {/* CTA Banner */}
-      <section className="py-5 bg-primary">
-        <Container>
-          <Row className="align-items-center">
-            <Col md={8} className="text-white">
-              <h2>Subscribe to Our Newsletter</h2>
-              <p>Get updates on new products, special offers, and more.</p>
-            </Col>
-            <Col md={4} className="mt-3 mt-md-0">
-              <Button 
-                as={Link} 
-                to="/contact" 
-                variant="light" 
-                size="lg"
-                className="w-100"
-              >
-                Subscribe Now
-              </Button>
-            </Col>
-          </Row>
-        </Container>
-      </section>
     </div>
   );
 };

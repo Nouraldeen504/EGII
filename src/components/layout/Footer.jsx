@@ -43,8 +43,8 @@ const Footer = () => {
             <ul>
               {/* <li><Link to="/faq">FAQs</Link></li>
               <li><Link to="/shipping">Shipping & Returns</Link></li> */}
-              <li><Link to="/privacy">Privacy Policy</Link></li>
-              <li><Link to="/terms">Terms & Conditions</Link></li>
+              <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-use">Terms & Conditions</Link></li>
             </ul>
           </Col>
           <Col lg={3} md={6} sm={12} className="mb-4">

@@ -66,6 +66,11 @@ const ProductCard = ({ product }) => {
             </Badge>
           </Link>
         )}
+        {product.attributes && product.attributes.map(attr =>
+          <Badge key={attr.attribute_name} bg="info" className="me-1">
+            {attr.attribute_name}: {attr.attribute_value}
+          </Badge>
+        )}
         
         <Card.Text>{truncateText(product.description, 80)}</Card.Text>
         

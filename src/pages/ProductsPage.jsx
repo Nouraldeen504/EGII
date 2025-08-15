@@ -26,8 +26,18 @@ const ProductsPage = () => {
     sort: sortBy,
     min_price: minPrice,
     max_price: maxPrice,
-    page
+    page,
+    ...restParams // all other params (for attribute filters)
   } = queryParams;
+
+  // Extract attribute filters (e.g. attr_Length, attr_Mode, etc.)
+  const attributeFilters = {};
+  Object.entries(restParams).forEach(([key, value]) => {
+    if (key.startsWith('attr_') && value) {
+      // Remove "attr_" prefix, use the rest as attribute name
+      attributeFilters[key.replace('attr_', '')] = value;
+    }
+  });
   
   // Fetch all categories for the filter component
   useEffect(() => {
@@ -68,7 +78,8 @@ const ProductsPage = () => {
           limit: productsPerPage
         };
         
-        const { data, count } = await productService.getAllProducts(filters);
+        // Pass attributeFilters as second argument for attribute-based filtering
+        const { data, count } = await productService.getAllProducts(filters, attributeFilters);
         
         setProducts(data);
         setTotalProducts(count);
@@ -81,7 +92,8 @@ const ProductsPage = () => {
     };
     
     fetchProducts();
-  }, [categoryId, search, sortBy, minPrice, maxPrice, currentPage]);
+    // Ensure effect re-runs when attributeFilters change
+  }, [categoryId, search, sortBy, minPrice, maxPrice, currentPage, ...Object.values(attributeFilters)]);
   
   return (
     <Container className="py-5">

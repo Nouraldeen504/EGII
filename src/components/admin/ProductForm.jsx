@@ -49,6 +49,15 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [attributes, setAttributes] = useState(product?.attributes || []);
+
+  // Category-to-attribute mapping (example)
+  const categoryAttributes = {
+    'MPO': ['Length', 'Mode', 'Connector', 'Fiber Count'],
+    'Indoor Fiber Patch Cords': ['Length', 'Mode', 'Connector'],
+    'Outdoor Fiber Patch Cords': ['Length', 'Mode', 'Connector'],
+    'SFPs': ['Subtype'],
+  };
   
   const initialValues = {
     name: product?.name || '',
@@ -80,6 +89,16 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
     
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetchAttributes = async () => {
+      if (product?.id) {
+        const attrs = await productService.getProductAttributes(product.id);
+        setAttributes(attrs);
+      }
+    };
+    fetchAttributes();
+  }, [product]);
 
   const handleUpload = async (file) => {
     if (!file) return null;
@@ -130,6 +149,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
       // Prepare data without the file object
       const dataToSubmit = {
         ...values,
+        attributes,
         image_url: imageUrl,
         datasheet_url: datasheetUrl
       };
@@ -191,6 +211,12 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
             setFieldValue('image_file', null);
           }
         };
+
+        // Determine fields
+        const selectedCategory = categories.find(cat => cat.id === values.category_id);
+        const attributeFields = selectedCategory
+          ? categoryAttributes[selectedCategory.name] || []
+          : [];
 
         return (
           <Form noValidate onSubmit={handleSubmit}>
@@ -301,6 +327,32 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                         {errors.category_id}
                       </Form.Control.Feedback>
                     </Form.Group>
+                    {/* --- ATTRIBUTE FIELDS HERE --- */}
+                    {attributeFields.length > 0 && (
+                      <>
+                        <h6 className="mt-4">Product Attributes</h6>
+                        {attributeFields.map(attrName => (
+                          <Form.Group key={attrName} className="mb-3" controlId={`attr_${attrName}`}>
+                            <Form.Label>{attrName}</Form.Label>
+                            <Form.Control
+                              type="text"
+                              value={attributes.find(a => a.attribute_name === attrName)?.attribute_value || ''}
+                              onChange={e => {
+                                const value = e.target.value;
+                                setAttributes(prev =>
+                                  [
+                                    ...prev.filter(a => a.attribute_name !== attrName),
+                                    { attribute_name: attrName, attribute_value: value }
+                                  ]
+                                );
+                              }}
+                              placeholder={`Enter ${attrName}`}
+                            />
+                          </Form.Group>
+                        ))}
+                      </>
+                    )}
+                    {/* --- END ATTRIBUTE FIELDS --- */}
                   </Card.Body>
                 </Card>
               </Col>

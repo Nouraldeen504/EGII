@@ -17,19 +17,53 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
   const [minPrice, setMinPrice] = useState(initialFilters.min_price || '');
   const [maxPrice, setMaxPrice] = useState(initialFilters.max_price || '');
   const [sortBy, setSortBy] = useState(initialFilters.sort || 'created_at:desc');
+  const [attributeFilters, setAttributeFilters] = useState({});
+
+  const categoryAttributeOptions = {
+    'SFPs': {
+      'Subtype': [
+        'GE-SFP',
+        'GE-SFP 85C',
+        'BIDI',
+        'SFP+',
+        'BIDI SFP+',
+        'QSFP+ 40G',
+        'QSFP28+ 100G',
+        'XFP+',
+      ]
+    },
+    'Indoor Fiber Patch Cords': {
+      'Mode': ['SingleMode', 'OM2', 'OM3', 'OM4'],
+      'Connector': ['LC-LC', 'LC-SC', 'SC-SC'],
+      'Length': ['1m', '2m', '3m', '5m', '10m', '15m', '20m', '25m', '30m'],
+    },
+    'Outdoor Fiber Patch Cords': {
+      'Mode': ['SingleMode', 'OM2', 'OM3', 'OM4'],
+      'Connector': ['LC-LC'],
+      'Length': ['50m', '100m', '150m', '200m', '250m', '300m'],
+    },
+    'MPO': {
+      'Mode': ['SingleMode', 'OM3', 'OM4'],
+      'Connector': ['MPO-MPO', 'MPO-LC', 'MPO-SC'],
+      'Fiber Count': ['8', '12', '16'],
+      'Length': ['5m', '10m', '15m'],
+    }
+  };
+  
+
+  // Get attribute options for selected category
+  const selectedCategory = categories.find(cat => cat.id === categoryId);
+  const attributeOptions = selectedCategory ? categoryAttributeOptions[selectedCategory.name] || {} : {};
+
   
   // Check screen size for responsive design
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 768);
     };
-    
     handleResize(); // Initial check
     window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
   
   // Handle search form submission
@@ -48,6 +82,13 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
       sort: sortBy || undefined,
       page: 1 // Reset to page 1 when filters change
     };
+
+    // Add attribute filters as attr_{AttributeName}
+    Object.entries(attributeOptions).forEach(([attrName]) => {
+      if (attributeFilters[attrName]) {
+        filters[`attr_${attrName}`] = attributeFilters[attrName];
+      }
+    });
     
     navigate(`${location.pathname}${buildQueryString(filters)}`);
   };
@@ -59,7 +100,7 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
     setMinPrice('');
     setMaxPrice('');
     setSortBy('created_at:desc');
-    
+    setAttributeFilters({});
     navigate(location.pathname);
   };
   
@@ -139,6 +180,7 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
                     value={categoryId} 
                     onChange={(e) => {
                       setCategoryId(e.target.value);
+                      setAttributeFilters({});
                     }}
                   >
                     <option value="">All Categories</option>
@@ -184,6 +226,35 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
                 </Row>
               </Col>
             </Row>
+
+            {/* --- ATTRIBUTE FIELDS AS DROPDOWNS --- */}
+            {selectedCategory && Object.keys(attributeOptions).length > 0 && (
+              <Row>
+                {Object.entries(attributeOptions).map(([attrName, options]) => (
+                  <Col md={3} key={attrName}>
+                    <Form.Group className="mb-3" controlId={`filter_${attrName}`}>
+                      <Form.Label>{attrName}</Form.Label>
+                      <Form.Select
+                        value={attributeFilters[attrName] || ''}
+                        onChange={e => {
+                          const value = e.target.value;
+                          setAttributeFilters(prev => ({
+                            ...prev,
+                            [attrName]: value
+                          }));
+                        }}
+                      >
+                        <option value="">Any</option>
+                        {options.map(option => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                ))}
+              </Row>
+            )}
+            {/* --- END ATTRIBUTE FIELDS --- */}
             
             <div className="d-flex justify-content-end mt-2">
               <Button 

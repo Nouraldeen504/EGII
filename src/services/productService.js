@@ -33,7 +33,7 @@ function extractStoragePath(url, bucketName) {
 
 export const productService = {
   // Fetch all products with category information
-  getAllProducts: async (filters = {}) => {
+  getAllProducts: async (filters = {}, attributeFilters = {}) => {
     try {
       let query = supabase
         .from('products')
@@ -65,6 +65,24 @@ export const productService = {
 
       if (filters.maxPrice) {
         query = query.lte('price', filters.maxPrice);
+      }
+
+      if (attributeFilters && Object.keys(attributeFilters).length > 0) {
+        // Find matching product IDs
+        let attrQuery = supabase
+          .from('product_attributes')
+          .select('product_id');
+        Object.entries(attributeFilters).forEach(([name, value]) => {
+          attrQuery = attrQuery.eq('attribute_name', name).eq('attribute_value', value);
+        });
+        const { data: attrData, error: attrError } = await attrQuery;
+        if (attrError) throw attrError;
+        const productIds = attrData.map(a => a.product_id);
+        if (productIds.length > 0) {
+          query = query.in('id', productIds);
+        } else {
+          return { data: [], count: 0 };
+        }
       }
 
       // Apply sorting
@@ -209,7 +227,7 @@ export const productService = {
       if (productData.image_url && productData.image_url.startsWith('blob:')) {
         delete productData.image_url;
       }
-      const { image_file, ...dataToSend } = productData;
+      const { image_file, attributes, ...dataToSend } = productData;
       const { data, error } = await supabase
         .from('products')
         .insert([dataToSend])
@@ -218,6 +236,11 @@ export const productService = {
 
       if (error) {
         throw error;
+      }
+
+      // Create attributes
+      if (attributes && attributes.length) {
+        await productService.createProductAttributes(data.id, attributes);
       }
 
       return data;
@@ -238,6 +261,8 @@ export const productService = {
 
 
       if (fetchError) throw fetchError;
+
+      const { attributes, ...updateData } = productData;
 
       // Update the product
       const { data, error } = await supabase
@@ -287,6 +312,10 @@ export const productService = {
         console.warn('Datasheet deletion failed:', deleteError);
       }
     }
+
+      if (attributes) {
+        await productService.updateProductAttributes(id, attributes);
+      }
 
       return data;
     } catch (error) {
@@ -357,6 +386,41 @@ export const productService = {
       console.error(`Error deleting product with id ${id}:`, error.message);
       throw error;
     }
+  },
+
+  // Create attributes for a product
+  createProductAttributes: async (productId, attributes) => {
+    // attributes: [{ attribute_name, attribute_value }, ...]
+    if (!productId || !attributes?.length) return [];
+    const { data, error } = await supabase
+      .from('product_attributes')
+      .insert(attributes.map(attr => ({
+        ...attr,
+        product_id: productId,
+      })));
+    if (error) throw error;
+    return data;
+  },
+
+  // Update attributes for a product (delete old, insert new)
+  updateProductAttributes: async (productId, attributes) => {
+    // Remove existing
+    await supabase
+      .from('product_attributes')
+      .delete()
+      .eq('product_id', productId);
+    // Add new
+    return await productService.createProductAttributes(productId, attributes);
+  },
+
+  // Get attributes for a product
+  getProductAttributes: async (productId) => {
+    const { data, error } = await supabase
+      .from('product_attributes')
+      .select('*')
+      .eq('product_id', productId);
+    if (error) throw error;
+    return data;
   },
 
   // Admin: Get low stock products for alerts

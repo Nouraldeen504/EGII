@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { FaSave, FaTimes, FaFilePdf, FaUpload, FaImage, FaDollarSign, FaBoxOpen } from 'react-icons/fa';
 import { supabase } from '../../services/supabase';
 import { categoryService } from '../../services/categoryService';
+import { productService } from '../../services/productService';
 import { toast } from 'react-toastify';
 
 const ProductSchema = Yup.object().shape({
@@ -42,6 +43,37 @@ const ProductSchema = Yup.object().shape({
     )
 });
 
+const categoryAttributeOptions = {
+  'SFPs': {
+    'Subtype': [
+      'GE-SFP',
+      'GE-SFP 85C',
+      'BIDI',
+      'SFP+',
+      'BIDI SFP+',
+      'QSFP+ 40G',
+      'QSFP28+ 100G',
+      'XFP+',
+    ]
+  },
+  'Indoor Fiber Patch Cords': {
+    'Mode': ['SingleMode', 'OM2', 'OM3', 'OM4'],
+    'Connector': ['LC-LC', 'LC-SC', 'SC-SC'],
+    'Length': ['1m', '2m', '3m', '5m', '10m', '15m', '20m', '25m', '30m'],
+  },
+  'Outdoor Fiber Patch Cords': {
+    'Mode': ['SingleMode', 'OM2', 'OM3', 'OM4'],
+    'Connector': ['LC-LC'],
+    'Length': ['50m', '100m', '150m', '200m', '250m', '300m'],
+  },
+  'MPO': {
+    'Mode': ['SingleMode', 'OM3', 'OM4'],
+    'Connector': ['MPO-MPO', 'MPO-LC', 'MPO-SC'],
+    'Fiber Count': ['8', '12', '16'],
+    'Length': ['5m', '10m', '15m'],
+  }
+};
+
 const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,14 +82,6 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState(null);
   const [attributes, setAttributes] = useState(product?.attributes || []);
-
-  // Category-to-attribute mapping (example)
-  const categoryAttributes = {
-    'MPO': ['Length', 'Mode', 'Connector', 'Fiber Count'],
-    'Indoor Fiber Patch Cords': ['Length', 'Mode', 'Connector'],
-    'Outdoor Fiber Patch Cords': ['Length', 'Mode', 'Connector'],
-    'SFPs': ['Subtype'],
-  };
   
   const initialValues = {
     name: product?.name || '',
@@ -86,7 +110,6 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
         setLoading(false);
       }
     };
-    
     fetchCategories();
   }, []);
 
@@ -102,15 +125,12 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
 
   const handleUpload = async (file) => {
     if (!file) return null;
-    
     try {
       setUploading(true);
       setUploadProgress(0);
-      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `products/${fileName}`;
-      
       const { error } = await supabase.storage
         .from('product-images')
         .upload(filePath, file, {
@@ -118,13 +138,10 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
           upsert: false,
           contentType: file.type,
         });
-      
       if (error) throw error;
-      
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
         .getPublicUrl(filePath);
-      
       return publicUrl;
     } catch (error) {
       console.error('Upload error:', error);
@@ -139,13 +156,20 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
     try {
       let imageUrl = values.image_url;
       let datasheetUrl = values.datasheet_url;
-
       // If a new file was selected, upload it
       if (selectedFile && values.image_url.startsWith('blob:')) {
         imageUrl = await handleUpload(selectedFile);
         if (!imageUrl) return; // Stop if upload failed
       }
-      
+
+      // Prepare attributes array to submit
+      const selectedCategory = categories.find(cat => cat.id === values.category_id);
+      const attributeOptions = selectedCategory ? categoryAttributeOptions[selectedCategory.name] || {} : {};
+      const attributeArray = Object.keys(attributeOptions).map(attrName => ({
+        attribute_name: attrName,
+        attribute_value: attributes.find(a => a.attribute_name === attrName)?.attribute_value || ''
+      }));
+
       // Prepare data without the file object
       const dataToSubmit = {
         ...values,
@@ -189,17 +213,14 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
         const handleFileChange = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
-          
           if (file.size > 5 * 1024 * 1024) {
             toast.error('File size too large (max 5MB)');
             return;
           }
-          
           setSelectedFile(file);
           const previewUrl = URL.createObjectURL(file);
           setFieldValue('image_url', previewUrl);
           setFieldValue('image_file', file.name);
-          
           // Auto-upload the file
           try {
             const imageUrl = await handleUpload(file);
@@ -212,11 +233,9 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
           }
         };
 
-        // Determine fields
+        // Determine attribute fields and options
         const selectedCategory = categories.find(cat => cat.id === values.category_id);
-        const attributeFields = selectedCategory
-          ? categoryAttributes[selectedCategory.name] || []
-          : [];
+        const attributeOptions = selectedCategory ? categoryAttributeOptions[selectedCategory.name] || {} : {};
 
         return (
           <Form noValidate onSubmit={handleSubmit}>
@@ -312,7 +331,7 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                       <Form.Select
                         name="category_id"
                         value={values.category_id}
-                        onChange={handleChange}
+                        onChange={e => {handleChange(e);setAttributes([]);}}
                         onBlur={handleBlur}
                         isInvalid={touched.category_id && !!errors.category_id}
                       >
@@ -327,27 +346,32 @@ const ProductForm = ({ product, onSubmit, isSubmitting }) => {
                         {errors.category_id}
                       </Form.Control.Feedback>
                     </Form.Group>
-                    {/* --- ATTRIBUTE FIELDS HERE --- */}
-                    {attributeFields.length > 0 && (
+                    {/* --- ATTRIBUTE FIELDS AS DROPDOWNS --- */}
+                    {selectedCategory && Object.keys(attributeOptions).length > 0 && (
                       <>
                         <h6 className="mt-4">Product Attributes</h6>
-                        {attributeFields.map(attrName => (
+                        {Object.entries(attributeOptions).map(([attrName, options]) => (
                           <Form.Group key={attrName} className="mb-3" controlId={`attr_${attrName}`}>
                             <Form.Label>{attrName}</Form.Label>
-                            <Form.Control
-                              type="text"
+                            <Form.Select
                               value={attributes.find(a => a.attribute_name === attrName)?.attribute_value || ''}
                               onChange={e => {
                                 const value = e.target.value;
-                                setAttributes(prev =>
-                                  [
-                                    ...prev.filter(a => a.attribute_name !== attrName),
+                                setAttributes(prev => {
+                                  // Replace or add the attribute value
+                                  const otherAttrs = prev.filter(a => a.attribute_name !== attrName);
+                                  return [
+                                    ...otherAttrs,
                                     { attribute_name: attrName, attribute_value: value }
-                                  ]
-                                );
+                                  ];
+                                });
                               }}
-                              placeholder={`Enter ${attrName}`}
-                            />
+                            >
+                              <option value="">Select {attrName}</option>
+                              {options.map(option => (
+                                <option key={option} value={option}>{option}</option>
+                              ))}
+                            </Form.Select>
                           </Form.Group>
                         ))}
                       </>

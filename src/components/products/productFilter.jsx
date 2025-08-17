@@ -85,8 +85,9 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
 
     // Add attribute filters as attr_{AttributeName}
     Object.entries(attributeOptions).forEach(([attrName]) => {
-      if (attributeFilters[attrName]) {
-        filters[`attr_${attrName}`] = attributeFilters[attrName];
+      const value = attributeFilters[attrName];
+      if (value && value !== "") {
+        filters[`attr_${attrName}`] = value;
       }
     });
     
@@ -109,10 +110,23 @@ const ProductFilter = ({ categories, initialFilters = {}, currentPage }) => {
     setShowFilters(!showFilters);
   };
 
+
+  // Immediate update when category changes
   useEffect(() => {
+    setAttributeFilters({});
     applyFilters();
+    // eslint-disable-next-line
   }, [categoryId]);
-  
+
+  // Immediate update when any attribute filter changes
+  useEffect(() => {
+    if (selectedCategory) {
+      applyFilters();
+    }
+    // eslint-disable-next-line
+  }, [attributeFilters, minPrice, maxPrice, sortBy]);
+
+
   return (
     <Card className="mb-4 shadow-sm">
       <Card.Body>
